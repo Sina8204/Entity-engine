@@ -291,14 +291,11 @@ def parse_string_to_list(input_string):
 
 # app.run()
 
-import shutil
-import os
+from ursina import *
 
-source = "/path/to/source/file.txt"
-destination_dir = "/path/to/destination/"
+app = Ursina()
 
-# نام فایل را از مسیر اصلی استخراج می‌کنیم
-file_name = os.path.basename(source)
-full_destination = os.path.join(destination_dir, file_name)
-print(file_name)
-#shutil.copy2(source, full_destination)
+s = Sprite()
+s.scale = (2 , 2)
+
+app.run()

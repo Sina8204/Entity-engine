@@ -232,6 +232,59 @@ class menu_creator:
         
         return button_menus
     
+    # def sort_menus(self , menus : list , y_space = 0.025 , do_sort_submenus = True):
+    #     space = 0
+    #     for menu in menus:
+    #         menu.y -= space
+    #         space += y_space
+    #         if do_sort_submenus:
+    #             self.sort_submenus(menu.buttons)
+
+    # def sort_submenus(self , submenus : list): 
+    #     for submenu in submenus:
+    #         if isinstance(submenu , DropdownMenuButton):
+    #             submenu.x += 1
+    #             submenu.y += 1
+    #         elif isinstance(submenu , DropdownMenu):
+    #             self.sort_submenus(submenu.buttons)
+    def vertical_sort(self , menus : list , y_space = 0.025 , do_sort_submenus = True):
+        space = 0
+        for menu in menus:
+            menu.y -= space
+            space += y_space
+            if do_sort_submenus and hasattr(menu , 'buttons'):
+                self.set_submenus_for_vertical_sort(menu.buttons)
+    
+    def set_submenus_for_vertical_sort(self , submenus : list): 
+        for submenu in submenus:
+            if isinstance(submenu , DropdownMenuButton):
+                submenu.x += 1
+                submenu.y += 1
+            elif isinstance(submenu , DropdownMenu):
+                self.set_submenus_for_vertical_sort(submenu.buttons)
+    
+    def destroy_menus(self , menus : list):
+        for menu in menus:
+            destroy(menu)
+
+    def show_menus(self , menus : list):
+        for menu in menus:
+            menu.enabled = True
+
+    def hide_menus(self , menus : list):
+        for menu in menus:
+            menu.enabled = False
+
+    def set_position(self , menus : list , position):
+        for menu in menus:
+            menu.position = position
+        self.vertical_sort(menus , do_sort_submenus=False)
+    
+    def destroy_menus(self , menus : list):
+        for menu in menus:
+            destroy(menu)
+        self.menu_cache = {}
+    
     def __call__(self, *args, **kwds):
         return {
             "menu" : self.create_menus(self.path , *args, **kwds) , 
@@ -1028,11 +1081,9 @@ class Entity_scripts_args_manager(tk.Tk):
 
 
 custom_fd = Customization_filedialog()
-
-# app = Ursina()
-# p = Button(model='quad', scale=(.4, .8), collider='box')
-# # for i in range(8):
-# #     Button(parent=p , scale_y=.05, text=f'giopwjoigjwr{i}', origin_y=.5, y=.5-(i*.05))
-
-# p.add_script(Scrollable())
-# app.run()
+if __name__ == "__main__":
+    app = Ursina()
+    creator = menu_creator()
+    menus = creator.create_menus('/media/sina/New Volume/python projects/Linux/Python/Engine/Menus/3_Entity')
+    creator.vertical_sort(menus)
+    app.run()

@@ -1,4 +1,4 @@
-import os , easygui , shutil , subprocess , sys
+import os , easygui , shutil , subprocess , sys , re
 
 
 
@@ -284,7 +284,8 @@ else :
                 return
             with open (script_source_path , "r" , encoding="utf-8") as script_file: 
                 script_name = script["name"]
-                self.entity = self.entity.replace("--script--", f"{script_file.read()}")
+                script_content = re.sub(r'^\s*from\s+ursina\s+import\s+\*\s*$', '', script_file.read(), flags=re.MULTILINE)
+                self.entity = self.entity.replace("--script--", f"{script_content}")
                 self.entity = self.entity.replace("--add_script--", f"self.add_script({script_name}(--args--))")
                 args = ''
                 kwargs = ''

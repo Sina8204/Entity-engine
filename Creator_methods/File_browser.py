@@ -10,6 +10,38 @@ import subprocess
 import os
 import shutil
 
+class asset_merger:
+    def __init__(self , project_path , assets_folder_name):
+        self.project_path = project_path
+        self.assets_folder_name = assets_folder_name
+    
+    def upload_assets(self):
+        project_assets_path = f"{self.project_path}/{self.assets_folder_name}"
+        if not os.path.exists(f"{self.project_path}/Source"):
+            os.mkdir(f"{self.project_path}/Source")
+        if not os.path.exists(f"{self.project_path}/Source/__{self.assets_folder_name}"):
+            os.mkdir(f"{self.project_path}/Source/__{self.assets_folder_name}")
+        self.merge_copy(project_assets_path , f"{self.project_path}/Source/__{self.assets_folder_name}")
+    
+    def merge_copy(self , src, dst):
+        """کپی و ادغام پوشه‌ها (بدون حذف پوشه مقصد)"""
+        
+        # اگر پوشه مقصد وجود ندارد، ایجاد کن
+        if not os.path.exists(dst):
+            shutil.copytree(src, dst)
+            return
+        
+        # لیست محتویات پوشه مبدأ
+        for item in os.listdir(src):
+            src_path = os.path.join(src, item)
+            dst_path = os.path.join(dst, item)
+            
+            if os.path.isdir(src_path):
+                # اگر پوشه است، به صورت بازگشتی کپی کن
+                self.merge_copy(src_path, dst_path)
+            else:
+                # اگر فایل است، کپی کن (بازنویسی)
+                shutil.copyfile(src_path, dst_path)
 
 class FileBrowserOpen:
     def __init__(self):
@@ -605,7 +637,10 @@ class FileBrowserOpen:
             ScriptManager.create_scn_runner_script(scenes_list = self._receive_project_scenes_dict , SceneName = self.opened_scene_name)
         else :
             easygui.msgbox(title="Field at receive scene source" , msg=f"path '{self.project_path}/Source/{self.opened_scene_name}/details.py' is not exists")
-        
+    
+    def merge_assets_to_source(self):
+        asset_object = asset_merger(self.project_path , self.assets_folder_name)
+        asset_object.upload_assets()
     
     
     def __call__(self, *args, **kwds):

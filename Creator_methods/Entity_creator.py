@@ -84,9 +84,10 @@ class entity_tools(Entity):
         # اتصال رویداد کلیک روی خود Entity
         self.on_click = self.toggle_selection
         self.menu_childs = menu_creator()
-        self.get_menu_childes = self.menu_childs.get_buttons_menu('Menus/3_Entity/2_3D entity' , parent = self)
-        self.get_menu_childes.append(DropdownMenuButton(text='Destroy' , on_click = self.destroy_WinPanel))
-        self.add_child_menu = DropdownMenu('Add child or destroy' , buttons=self.get_menu_childes , parent = camera.ui , enabled = False)
+        self.menu_childs_list = self.menu_childs.create_menus('Menus/3_Entity', parent = self)
+        self.menu_childs_list.append(DropdownMenuButton(text='Destroy' , on_click = self.destroy_WinPanel))
+        self.hide_menu_childe()
+        self.menu_childs.vertical_sort(menus=self.menu_childs_list , do_sort_submenus=True)
 
         self.destroy_window = None
         self.select_button = None
@@ -110,9 +111,7 @@ class entity_tools(Entity):
         destroy(self.group_gismo)
         self.inspector.destroy_panels()
         destroy(self.destroy_window)
-        destroy(self.add_child_menu)
-        for i in self.get_menu_childes:
-            destroy(i)
+        self.menu_childs.destroy_menus(self.menu_childs_list)
         if self.select_button:
             self.select_button.remove()
         get_win_panel = [win_panel for win_panel in scene.entities if type(win_panel) is WindowPanel]
@@ -308,10 +307,18 @@ class entity_tools(Entity):
         texture_path = custom_fd.openfile(title="texture path" , msg="Select texture" , defult_path=f'{Browser.project_path}/{Browser.assets_folder_name}')
         if os.path.exists(str(texture_path)):
             if texture_path.startswith(f"{Browser.project_path}/{Browser.assets_folder_name}"):
-                shutil.copyfile(texture_path , f"{Browser.project_path}/Source/__{Browser.assets_folder_name}/{os.path.basename(texture_path)}")
+                Browser.merge_assets_to_source()
                 texture_path = texture_path.replace(f"{Browser.project_path}/{Browser.assets_folder_name}", '')
-                self.texture = load_texture(texture_path)
-                ProjectData.set_value(self.name , 'texture' , texture_path)
+                texture_file_name = os.path.basename(texture_path)
+                self.texture = load_texture(f"/{texture_file_name}")
+                self.inspector.set_content_attr(panel_name= "Texture_panel" , content=("preview" , Sprite) , attr="texture" , value=self.texture)
+                ProjectData.set_value(self.name , 'texture' , f"/{texture_file_name}")
+            else:
+                custom_fd.show_msg(type="error" , box_title="Field at set texture" , msg=f"Assets must be in the '{Browser.assets_folder_name}' folder.")
+                return
+        else:
+            custom_fd.show_msg(type="error" , box_title="Field at set texture" , msg=f"'{texture_path}' is not exists.")
+            return
         print(f"Texture path : {texture_path}")
         print(f"Project path : {Browser.project_path}/{Browser.assets_folder_name}")
 
@@ -403,16 +410,12 @@ class entity_tools(Entity):
             self.hide_menu_childe()
     
     def show_menu_childe(self):
-        self.add_child_menu.enabled = True
-        self.add_child_menu.position = mouse.position
-        #Sort_menus(self.child_menu())
-        print(f'show menu ==> {self.add_child_menu}' )
+        self.menu_childs.show_menus(self.menu_childs_list)
+        self.menu_childs.set_position(self.menu_childs_list , mouse.position)
+        print("child menu shown")
     
     def hide_menu_childe(self):
-        if self.add_child_menu :
-            self.add_child_menu.enabled = False
-        else :
-            pass
+        self.menu_childs.hide_menus(self.menu_childs_list)
         print('hide menu')
 
     def update(self):
@@ -538,8 +541,9 @@ class entity_tools(Entity):
                 Button(name = "panel_color" , text = 'Color'),
                 Space(1),
                 Button(name = "add_texture" , text="Set texture"),
-                Sprite(),
                 Space(1),
+                Sprite(name = "preview" , scale = (3 , 3)),
+                Space(0.01),
                 Button(name = 'panel_script' , text="Script")
             ) , enabled = False) ,
 
@@ -583,6 +587,8 @@ class entity_tools(Entity):
 
         self.inspector.set_content_attr( panel_name = 'Color' , content = ('color_value' , ColorPicker) , attr = 'value' , value = self.color)
 
+        # self.inspector.set_content_attr(panel_name= "Texture_panel" , content=("preview" , Sprite) , attr="scale" , value=(1 , 1))
+        self.inspector.set_content_attr(panel_name= "Texture_panel" , content=("preview" , Sprite) , attr="texture" , value=self.texture)
         #################### Set text_fields value ####################
 
         #################### Set text_fields events ####################
@@ -638,7 +644,7 @@ class create_entity(entity_tools):
         self.rotation = Rotation
         self.scale = Scale
         self.color= Color
-        if Texture and os.path.exists(Texture):
+        if Texture:
             self.texture = load_texture(Texture)
         #self.scale=(0.5, 0.5, 0.5)
         self.details_entity = {
