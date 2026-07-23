@@ -1,49 +1,53 @@
 from ursina import *
-from Creator_methods import create_entity , custom_fd ,Browser
+from Creator_methods import create_camera , custom_fd ,Browser, entity_buttons #, add_entity_to_dict , add_child_to_tree
 from AppData import ProjectData
-import json
 
 
 def main(
-        model_path = '',
-        model = "sky_dome",
         parent = None , 
-        name = 'sky_dome' , 
+        model = '/camera.glb',
+        name = 'camera' , 
         color = color.gray , 
         position = (0 , 0 , 0) , 
         rotation = (0 , 0 , 0) , 
         scale = (1 , 1 , 1) , 
-        texture = None ,
+        fov = 40 ,
+        near_plane = 0.1 ,
+        far_plane = 100.0 ,
+        orthographic = False ,
         script = None):
     #print(f'main parent ==> {parent}')
     if not Browser.project_path:
         custom_fd.show_msg(type='warnning' , box_title="Field at create entity" , msg="Create or open a project before operation create entity")
         return
     
-    model_path = 'Menus/3_Entity/2_3D entity/8_sky dome.py'
     if parent:
-        return create_entity(
-            model_path = model_path ,
-            Model = model ,
+        return create_camera(
             Name = name ,
+            Model=model ,
             Position = position ,
             Rotation = rotation ,
             Scale = scale ,
             Color = color ,
+            fov = fov ,
+            near_plane = near_plane ,
+            far_plane = far_plane ,
+            orthographic = orthographic ,
             Parent = parent ,
-            Texture = texture ,
             Script = script
             )
     else:
-        return create_entity(
-            model_path = model_path ,
-            Model = model ,
+        return create_camera(
             Name = name ,
+            Model=model ,
             Position = position ,
             Rotation = rotation ,
             Scale = scale ,
             Color = color ,
-            Texture = texture ,
+            fov = fov ,
+            near_plane = near_plane ,
+            far_plane = far_plane ,
+            orthographic = orthographic ,
             Script = script
         )
 

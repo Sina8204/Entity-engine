@@ -1,4 +1,5 @@
 from ursina import *
+from Creator_methods.Camera_controller import Active_camera_controller
 from .UI_classes import ColorPicker
 from .UI_classes import PanelManager , menu_creator , execute_file_module , desimal_inputfield , custom_fd , Entity_scripts_args_manager , Sort_menus , catch_menus , ScrollableInputField
 from ursina.prefabs.dropdown_menu import DropdownMenu, DropdownMenuButton
@@ -18,7 +19,7 @@ class --name--:
     
     def update(self):
         pass"""
-#app = Ursina()         
+app = Ursina()         
 
 class tree_button():
     def __init__(self):
@@ -34,11 +35,17 @@ class entity_tools(Entity):
         self.is_set_parent = False
         # متغیرهای وضعیت انتخاب
         self.is_selected = False
-        
         # ایجاد گروه گیزموها
+        self.model = '/camera.glb'
         self.group_gismo = Entity()
         self.group_gismo.position = self.position
+
+        # projection attributes
         
+        self.fov = 40
+        self.near_plane = 0.1
+        self.far_plane = 100.0
+        self.orthographic = False
         # ایجاد گیزموها
         self.x_gis = Entity(
             model='cube', 
@@ -73,10 +80,9 @@ class entity_tools(Entity):
         self.last_mouse_position = None
         
         # ایجاد جسم اصلی (خود Entity)
-        self.model = 'cube'
         self.color = color.white
         self.scale = 0.5
-        self.collider = 'box'  # برای تشخیص کلیک روی خود Entity
+        self.collider = 'mesh'  # برای تشخیص کلیک روی خود Entity
         
         # اتصال رویدادهای کلیک روی گیزموها
         self.x_gis.on_click = self.start_drag_x
@@ -156,6 +162,8 @@ class entity_tools(Entity):
                 widget_name = 'Scale_x' , 
                 widget_class = desimal_inputfield ,
                 attr='value')
+            if Active_camera_controller.is_set_camera:
+                Active_camera_controller.set_scale(self.scale)
             ProjectData.set_value(self.name , "scale" , tuple(self.scale))
             print(f'scale x seted : {self.scale_x}')
         except Exception as e:
@@ -168,6 +176,8 @@ class entity_tools(Entity):
                 widget_name = 'Scale_y' , 
                 widget_class = desimal_inputfield ,
                 attr='value')
+            if Active_camera_controller.is_set_camera:
+                Active_camera_controller.set_scale(self.scale)
             ProjectData.set_value(self.name , "scale" , tuple(self.scale))
             print(f'scale x seted : {self.scale_y}')
         except Exception as e:
@@ -181,6 +191,8 @@ class entity_tools(Entity):
                 widget_class = desimal_inputfield ,
                 attr='value')
             print(f'scale x seted : {self.scale_z}')
+            if Active_camera_controller.is_set_camera:
+                Active_camera_controller.set_scale(self.scale)
             ProjectData.set_value(self.name , "scale" , tuple(self.scale))
         except Exception as e:
             pass
@@ -193,6 +205,8 @@ class entity_tools(Entity):
                 widget_class = desimal_inputfield ,
                 attr='value')
             ProjectData.set_value(self.name , "rotation" , tuple(self.rotation))
+            if Active_camera_controller.is_set_camera:
+                Active_camera_controller.set_rotation(self.rotation)
             print(f'rot x seted : {self.rotation_x}')
         except Exception as e:
             pass
@@ -204,6 +218,8 @@ class entity_tools(Entity):
                 widget_name = 'Rotation_y' , 
                 widget_class = desimal_inputfield ,
                 attr='value')
+            if Active_camera_controller.is_set_camera:
+                Active_camera_controller.set_rotation(self.rotation)
             ProjectData.set_value(self.name , "rotation" , tuple(self.rotation))
             print(f'rot y seted : {self.rotation_y}')
         except Exception as e:
@@ -216,6 +232,8 @@ class entity_tools(Entity):
                 widget_name = 'Rotation_z' , 
                 widget_class = desimal_inputfield ,
                 attr='value')
+            if Active_camera_controller.is_set_camera:
+                Active_camera_controller.set_rotation(self.rotation)
             ProjectData.set_value(self.name , "rotation" , tuple(self.rotation))
             print(f'rot z seted : {self.rotation_z}')
         except Exception as e:
@@ -229,6 +247,8 @@ class entity_tools(Entity):
                 widget_class = desimal_inputfield ,
                 attr='value')
             self.position = (x , self.y , self.z)
+            if Active_camera_controller.is_set_camera:
+                Active_camera_controller.set_position(self.position)
             ProjectData.set_value(self.name , "position" , tuple(self.position))
             print(f'pos x seted : {self.position}')
         except Exception as e:
@@ -243,6 +263,8 @@ class entity_tools(Entity):
                 widget_class = desimal_inputfield ,
                 attr='value')
             self.position = (self.x , y , self.z)
+            if Active_camera_controller.is_set_camera:
+                Active_camera_controller.set_position(self.position)
             ProjectData.set_value(self.name , "position" , tuple(self.position))
             print(f'pos x seted : {self.position}')
         except Exception as e:
@@ -257,11 +279,77 @@ class entity_tools(Entity):
                 widget_class = desimal_inputfield ,
                 attr='value')
             self.position = (self.x , self.y , z)
+            if Active_camera_controller.is_set_camera:
+                Active_camera_controller.set_position(self.position)
             ProjectData.set_value(self.name , "position" , tuple(self.position))
             print(f'pos x seted : {self.position}')
         except Exception as e:
             pass
+
+    def set_unset_camera(self):
+        if Active_camera_controller.is_set_camera:
+            Active_camera_controller.un_set_camera()
+            print(f"Check is_set_camera => {Active_camera_controller.is_set_camera}")
+            self.inspector.set_content_attr( panel_name = 'name' , content = ('set_camera' , Button) , attr = 'text' , value = 'set camera')
+        else:
+            Active_camera_controller.set_camera(
+                position = self.position ,
+                rotation = self.rotation ,
+                scale = self.scale ,
+                fov = self.fov ,
+                near_plane = self.near_plane ,
+                far_plane = self.far_plane ,
+                orthographic = self.orthographic
+            )
+            print(f"Check is_set_camera => {Active_camera_controller.is_set_camera}")
+            self.inspector.set_content_attr( panel_name = 'name' , content = ('set_camera' , Button) , attr = 'text' , value = 'Unset camera')
     
+    def set_fov(self):
+        fov = self.inspector.get_widget_value(
+            Panel_name = 'Projection' , 
+            widget_name = 'fov' , 
+            widget_class = desimal_inputfield ,
+            attr='value')
+        self.fov = float(fov)
+        if Active_camera_controller.is_set_camera:
+            Active_camera_controller.set_fov(self.fov)
+        ProjectData.set_value(self.name , "fov" , float(fov))
+        print(f'fov seted : {self.fov} --> type : {type(self.fov)}')
+
+    def set_near_plane(self):
+        near_plane = self.inspector.get_widget_value(
+            Panel_name = 'Projection' , 
+            widget_name = 'near_plane' , 
+            widget_class = desimal_inputfield ,
+            attr='value')
+        self.near_plane = float(near_plane) if float(near_plane) >= 0.0 else 0.1
+        if Active_camera_controller.is_set_camera:
+            Active_camera_controller.set_near_plane(self.near_plane)
+        ProjectData.set_value(self.name , "near_plane" , float(near_plane))
+        print(f'near plane seted : {self.near_plane}')
+
+    def set_far_plane(self):
+        far_plane = self.inspector.get_widget_value(
+            Panel_name = 'Projection' , 
+            widget_name = 'far_plane' , 
+            widget_class = desimal_inputfield ,
+            attr='value')
+        self.far_plane = float(far_plane) if float(far_plane) >= 0.0 else 1.0
+        if Active_camera_controller.is_set_camera:
+            Active_camera_controller.set_far_plane(self.far_plane)
+        ProjectData.set_value(self.name , "far_plane" , float(far_plane))
+        print(f'far plane seted : {self.far_plane} --> type({type(self.far_plane)})')
+
+    def set_orthographic(self):
+        if self.orthographic:
+            self.orthographic = False
+            self.inspector.set_content_attr( panel_name = 'Projection' , content = ('orthographic' , Button) , attr = 'text' , value = 'Active orthographic')
+        else :
+            self.orthographic = True
+            self.inspector.set_content_attr( panel_name = 'Projection' , content = ('orthographic' , Button) , attr = 'text' , value = 'Unactive orthographic')
+        Active_camera_controller.set_orthographic(self.orthographic)
+        ProjectData.set_value(self.name , "orthographic" , bool(self.orthographic))
+                
     def make_script(self):
         if not Browser.project_path :
             custom_fd.show_msg('warnning' , box_title='Field at create script' , msg = 'Create or open a project before creating script')
@@ -304,26 +392,6 @@ class entity_tools(Entity):
         self.details_entity["script"]["args"] = args
         self.details_entity["script"]["kwargs"] = kwargs
         ProjectData.set_value(self.name , 'script' , self.details_entity["script"])
-
-    def set_texture(self):
-        texture_path = custom_fd.openfile(title="texture path" , msg="Select texture" , defult_path=f'{Browser.project_path}/{Browser.assets_folder_name}')
-        if os.path.exists(str(texture_path)):
-            if texture_path.startswith(f"{Browser.project_path}/{Browser.assets_folder_name}"):
-                Browser.merge_assets_to_source()
-                texture_path = texture_path.replace(f"{Browser.project_path}/{Browser.assets_folder_name}", '')
-                texture_file_name = os.path.basename(texture_path)
-                self.texture = load_texture(f"/{texture_file_name}")
-                self.inspector.set_content_attr(panel_name= "Texture_panel" , content=("preview" , Sprite) , attr="texture" , value=self.texture)
-                ProjectData.set_value(self.name , 'texture' , f"/{texture_file_name}")
-            else:
-                custom_fd.show_msg(type="error" , box_title="Field at set texture" , msg=f"Assets must be in the '{Browser.assets_folder_name}' folder.")
-                return
-        else:
-            custom_fd.show_msg(type="error" , box_title="Field at set texture" , msg=f"'{texture_path}' is not exists.")
-            return
-        print(f"Texture path : {texture_path}")
-        print(f"Project path : {Browser.project_path}/{Browser.assets_folder_name}")
-
         
 
     def toggle_selection(self):
@@ -486,9 +554,11 @@ class entity_tools(Entity):
         self.inspector.add_panels(
             name = WindowPanel(title="Set name" , content=(
                 InputField(name = "name_field") ,
+                Button(name = 'set_camera' , text='Set camera'),
+                Space(0.5),
                 Button(name = 'panel_transform' , text = "Set transform"),
+                Button(name = "panel_projection" , text = 'Projection'),
                 Button(name = 'panel_color' , text = "Set color"),
-                Button(name = 'panel_texture' , text = "Set texture"),
                 Button(name = 'panel_script' , text="Script")
             ) , enabled = False) ,
 
@@ -502,8 +572,8 @@ class entity_tools(Entity):
                 desimal_inputfield(name='Position_z' , default_value=str(0.0) , limit_content_to='-+.0123456789') ,
                 Button(name = "panel_rotation" , text = 'Rotation') ,
                 Button(name = "panel_scale" , text = 'Scale'),
+                Button(name = "panel_projection" , text = 'Projection'),
                 Button(name = "panel_color" , text = 'Color'),
-                Button(name = 'panel_texture' , text = "Set texture"),
                 Button(name = 'panel_script' , text="Script")
             ) , enabled = False) ,
 
@@ -517,8 +587,8 @@ class entity_tools(Entity):
                 Text('Rotation Z :'),
                 desimal_inputfield(name='Rotation_z' , default_value=str(0.0) , limit_content_to='-+.0123456789') ,
                 Button(name = "panel_scale" , text = 'Scale'),
+                Button(name = "panel_projection" , text = 'Projection'),
                 Button(name = "panel_color" , text = 'Color'),
-                Button(name = 'panel_texture' , text = "Set texture"),
                 Button(name = 'panel_script' , text="Script")
             ) , enabled = False) ,
 
@@ -532,35 +602,39 @@ class entity_tools(Entity):
                 desimal_inputfield(name='Scale_y' , default_value=str(0.0) , limit_content_to='-+.0123456789') ,
                 Text('Scale Z :'),
                 desimal_inputfield(name='Scale_z' , default_value=str(0.0) , limit_content_to='-+.0123456789') ,
+                Button(name = "panel_projection" , text = 'Projection'),
                 Button(name = "panel_color" , text = 'Color') ,
-                Button(name = 'panel_texture' , text = "Set texture"),
-                Button(name = 'panel_script' , text="Script")
-            ) , enabled = False) ,
-            Color = WindowPanel(title="Set color" , content=(
-                Button(name = 'panel_name' , text = "set name") ,
-                Button(name = 'panel_transform' , text = "Set transform"),
-                ColorPicker(name = 'color_value') ,
-                Button(name = 'panel_texture' , text = "Set texture"),
                 Button(name = 'panel_script' , text="Script")
             ) , enabled = False) ,
 
-            Texture_panel = WindowPanel(title="Set texture" , content=(
+            Projection = WindowPanel(title="Perojection settings" , content=(
                 Button(name = 'panel_name' , text = "set name") ,
                 Button(name = 'panel_transform' , text = "Set transform"),
-                Button(name = "panel_color" , text = 'Color'),
-                Space(1),
-                Button(name = "add_texture" , text="Set texture"),
-                Space(1),
-                Sprite(name = "preview" , scale = (3 , 3)),
-                Space(0.01),
+                Text("Fov :") ,
+                desimal_inputfield(name='fov' , default_value=str(0.0) , limit_content_to='-+.0123456789') , 
+                Text('Near plane :'),
+                desimal_inputfield(name='near_plane' , default_value=str(0.0) , limit_content_to='-+.0123456789') ,
+                Text('Far plane :'),
+                desimal_inputfield(name='far_plane' , default_value=str(0.0) , limit_content_to='-+.0123456789') ,
+                Button(name = 'orthographic' , text = 'Active orthographic'),
+                Space(0.5),
+                Button(name = "panel_color" , text = 'Color') ,
+                Button(name = 'panel_script' , text="Script")
+            ) , enabled = False) ,
+
+            Color = WindowPanel(title="Set color" , content=(
+                Button(name = 'panel_name' , text = "set name") ,
+                Button(name = 'panel_transform' , text = "Set transform"),
+                Button(name = "panel_projection" , text = 'Projection'),
+                ColorPicker(name = 'color_value') ,
                 Button(name = 'panel_script' , text="Script")
             ) , enabled = False) ,
 
             Script = WindowPanel(title = "Add script" , content=(
                 Button(name = 'panel_name' , text = "set name") ,
                 Button(name = 'panel_transform' , text = "Set transform"),
+                Button(name = "panel_projection" , text = 'Projection'),
                 Button(name = "panel_color" , text = 'Color'),
-                Button(name = 'panel_texture' , text = "Set texture"),
                 Space(1),
                 Button(name = "add_script" , text="Add script") ,
                 Button(name = "set_attr" , text='Set attributes')
@@ -573,9 +647,9 @@ class entity_tools(Entity):
                                             panel_position = 'Position' ,
                                             panel_rotation = 'Rotation' ,
                                             panel_scale = 'Scale' ,
+                                            panel_projection = 'Projection' ,
                                             panel_color = 'Color' ,
-                                            panel_script = 'Script' ,
-                                            panel_texture = 'Texture_panel'
+                                            panel_script = 'Script'
                                         )
         
         #################### Set text_fields value ####################
@@ -594,15 +668,18 @@ class entity_tools(Entity):
         self.inspector.set_content_attr( panel_name = 'Scale' , content = ('Scale_y' , InputField) , attr = 'text' , value = str(self.scale_y))
         self.inspector.set_content_attr( panel_name = 'Scale' , content = ('Scale_z' , InputField) , attr = 'text' , value = str(self.scale_z))
 
+        self.inspector.set_content_attr( panel_name = 'Projection' , content = ('fov' , InputField) , attr = 'text' , value = str(self.fov))
+        self.inspector.set_content_attr( panel_name = 'Projection' , content = ('near_plane' , InputField) , attr = 'text' , value = str(self.near_plane))
+        self.inspector.set_content_attr( panel_name = 'Projection' , content = ('far_plane' , InputField) , attr = 'text' , value = str(self.far_plane))
+        
         self.inspector.set_content_attr( panel_name = 'Color' , content = ('color_value' , ColorPicker) , attr = 'value' , value = self.color)
 
-        # self.inspector.set_content_attr(panel_name= "Texture_panel" , content=("preview" , Sprite) , attr="scale" , value=(1 , 1))
-        self.inspector.set_content_attr(panel_name= "Texture_panel" , content=("preview" , Sprite) , attr="texture" , value=self.texture)
         #################### Set text_fields value ####################
 
         #################### Set text_fields events ####################
 
         self.inspector.set_content_event( panel_name = 'name' , content=('name_field' , InputField) , event='on_value_changed' , handler = self.set_name)
+        self.inspector.set_content_event( panel_name = 'name' , content=('set_camera' , Button) , event='on_click' , handler = self.set_unset_camera)
         
         self.inspector.set_content_event( panel_name = 'Position' ,content=('Position_x' , desimal_inputfield) ,event='on_value_changed' ,handler = self.set_pos_x)
         self.inspector.set_content_event( panel_name = 'Position' ,content=('Position_y' , desimal_inputfield) ,event='on_value_changed' ,handler = self.set_pos_y)
@@ -618,7 +695,11 @@ class entity_tools(Entity):
         
         self.inspector.set_content_event( panel_name = 'Color' ,content=('color_value' , ColorPicker) ,event='on_value_changed' ,handler = self.set_color)
 
-        self.inspector.set_content_event( panel_name = 'Texture_panel' , content=('add_texture' , Button) , event='on_click' , handler = self.set_texture)
+        self.inspector.set_content_event( panel_name = 'Projection' ,content=('fov' , desimal_inputfield) ,event='on_value_changed' ,handler = self.set_fov)
+        self.inspector.set_content_event( panel_name = 'Projection' ,content=('near_plane' , desimal_inputfield) ,event='on_value_changed' ,handler = self.set_near_plane)
+        self.inspector.set_content_event( panel_name = 'Projection' ,content=('far_plane' , desimal_inputfield) ,event='on_value_changed' ,handler = self.set_far_plane)
+        self.inspector.set_content_event( panel_name = 'Projection' ,content=('orthographic' , Button) ,event='on_click' ,handler = self.set_orthographic)
+
 
         self.inspector.set_content_event( panel_name = 'Script' , content=("add_script" , Button) , event="on_click" , handler = self.make_script)
         self.inspector.set_content_event( panel_name = 'Script' , content=("set_attr" , Button) , event="on_click" , handler = self.add_attrs_to_ent_script)
@@ -626,12 +707,11 @@ class entity_tools(Entity):
         
         #################### Set text_fields events ####################
 
-class create_entity(entity_tools):
+class create_camera(entity_tools):
     def __init__(self, 
                  add_to_scene_entities=True, 
                  enabled=True, 
-                 model_path = None ,
-                 Model = None , 
+                 Model = '/camera.glb' ,
                  Script = None , 
                  Parent = None, 
                  Name = None , 
@@ -639,10 +719,12 @@ class create_entity(entity_tools):
                  Position = (0 , 0 , 0) , 
                  Rotation = (0 , 0 , 0) , 
                  Scale = (1 , 1 , 1) ,
-                 Texture = None,
+                 Fov = 40 ,
+                 Near_plane = 0.1 ,
+                 Far_plane = 100.0 ,
+                 Orthographic = False ,
                  **kwargs):
         super().__init__(add_to_scene_entities, enabled, **kwargs)
-        self.model=Model
         counter = 1
         while (Name in ProjectData.data["__names__"]):
             Name = f"{Name}{counter}"
@@ -653,17 +735,22 @@ class create_entity(entity_tools):
         self.rotation = Rotation
         self.scale = Scale
         self.color= Color
-        if Texture:
-            self.texture = load_texture(Texture)
+        self.fov = float(Fov)
+        self.near_plane = float(Near_plane)
+        self.far_plane = float(Far_plane)
+        self.orthographic = bool(Orthographic)
         #self.scale=(0.5, 0.5, 0.5)
         self.details_entity = {
-                "model_path" : model_path if model_path and os.path.exists(model_path) else 'unset path value',
-                "model" : f"{Model}" if not Model is None else None,
+                "model_path" : "Menus/3_Entity/2_3D entity/10_camera.py" ,#model_path if model_path and os.path.exists(model_path) else 'unset path value',
+                "model" : Model ,
                 "color" : tuple(self.color) ,
                 "position" : tuple(self.position) ,
                 "rotation" : tuple(self.rotation),
                 "scale" : tuple(self.scale),
-                "texture" : str(self.texture) ,
+                "fov" : float(self.fov) ,
+                "near_plane" : float(self.near_plane) ,
+                "far_plane" : float(self.far_plane) ,
+                "orthographic" : bool(self.orthographic) ,
                 "script" : Script ,
                 "children" : {}
         }
@@ -691,32 +778,3 @@ class create_entity(entity_tools):
             self.deselect()
         else:
             self.select()
-  
-# # ایجاد نمونه
-# test = create_entity(position=(0, 0, 0))
-# test2 = create_entity(position=(2, 0, 0))
-# test3 = create_entity(position=(-2, 0, 0))
-# test4 = create_entity(position=(0, 0, 2))
-# test5 = create_entity(position=(0, 0, -2))
-
-# # اضافه کردن زمین برای سهولت در دید
-
-
-# # تنظیم دوربین
-# camera.position = (5, 5, 5)
-# camera.look_at(Vec3(0, 0, 0))
-
-# # اضافه کردن راهنما
-# def input(key):
-#     if key == 'escape':
-#         # Deselect همه
-#         if create_entity.selected_entity is not None:
-#             create_entity.selected_entity.deselect()
-
-# print("Controls:")
-# print("- Click on an entity to select it (only one can be selected at a time)")
-# print("- Click on selected entity again to deselect it")
-# print("- When selected, click and drag on red/green/blue gizmo to move")
-# print("- Press ESC to deselect all")
-
-# app.run()

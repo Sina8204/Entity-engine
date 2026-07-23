@@ -1,4 +1,5 @@
 from .Entity_creator import create_entity
+from .Camera_creator import create_camera
 from .UI_classes import *
 #from .panel_contents import *
 from .tree_button import TreeButton , entity_buttons

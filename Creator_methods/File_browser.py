@@ -131,6 +131,11 @@ class FileBrowserOpen:
                     easygui.msgbox(title="Field at save scene" , msg="Canceling the save operation")
                     self._close('scene')
                     return 'cancel'
+
+                if self.opened_scene_name in ProjectData.data["__names__"]:
+                    easygui.msgbox(title="Field at save scene" , msg=f"Try choose a name that is different from the entity names.\nThe name '{self.opened_scene_name}' is in the list of entity names for this scene.\nPlease try again and choose a different name.")
+                    self._close('scene')
+                    return 'cancel'
                 
                 scene_path = easygui.diropenbox(
                     title="New project" ,
@@ -606,6 +611,9 @@ class FileBrowserOpen:
             case 'scene':
                 self.opened_scene = ''
                 self.opened_scene_name = ''
+        Active_camera_controller.set_opened_scene_text(path='')
+        Active_camera_controller.set_opened_scene_source_text(path='')
+        
 
     def _set_ProjectData_path(self):
         ProjectData.path = self.opened_scene

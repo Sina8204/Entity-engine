@@ -19,9 +19,10 @@ ground.y -= 1
 # راه‌اندازی دوربین
 from Creator_methods.Camera_controller import Active_camera_controller
 # data_manager.set_item(child_items = 'test')
-
+#my_entity = Entity(model='camera.glb', position=(0, 0, 0))
 def input(key):
     match(key):
         case "q": print(json.dumps(ProjectData.data , ensure_ascii=False , indent=2))
+        case "t" : print(ProjectData.data)
         case "b": print(json.dumps(Browser() , ensure_ascii=False , indent=2))
 app.run()

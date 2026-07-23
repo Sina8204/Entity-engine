@@ -291,11 +291,20 @@ def parse_string_to_list(input_string):
 
 # app.run()
 
+# # فرض کنید فایل شما با نام 'my_model.blend' در کنار فایل پایتون است
+# 
 from ursina import *
 
 app = Ursina()
 
-s = Sprite()
-s.scale = (2 , 2)
 
+cube = Entity(model='cube', color=color.orange, scale=2)
+
+def input(key):
+    # غیرفعال کردن همه دوربین‌ها و فعال کردن دوربین انتخاب‌شده
+    if key == '1':
+        camera.clip_plane_near = 0.1
+        camera.clip_plane_far = 20
+        print('1')
+EditorCamera()
 app.run()
