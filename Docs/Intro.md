@@ -107,7 +107,7 @@ def main(*args , **kwargs)
   - 📂 Creator_methods ← متدهای سازنده و ابزارهای ایجاد
     - 📂 3D_objects
       - camera.glb ← مدل سه‌بعدی دوربین
-    - Camera_controller.py
+    - [Camera_controller.py](Docs/Camera_controller.md) ← مدیریت دوربین صحنه
     - Camera_creator.py
     - deselect.py
     - Entity_creator.py
