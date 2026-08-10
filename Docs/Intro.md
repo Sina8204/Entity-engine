@@ -97,7 +97,7 @@ def main(*args , **kwargs)
 </p>
 
 - **Entity Engine**
-  - 📂 [AppData](www.google.com) ← داده‌ها و تنظیمات برنامه
+  - 📂 AppData ← داده‌ها و تنظیمات برنامه
     - init.py
     - last_data.json ← آخرین وضعیت پروژه
     - ProjectData_manager.py
