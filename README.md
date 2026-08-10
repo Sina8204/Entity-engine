@@ -97,7 +97,7 @@ def main(*args , **kwargs)
 </p>
 
 - **Entity Engine**
-  - 📂 [AppData](www.google.com) ← داده‌ها و تنظیمات برنامه
+  - 📂 AppData ← داده‌ها و تنظیمات برنامه
     - init.py
     - last_data.json ← آخرین وضعیت پروژه
     - ProjectData_manager.py
@@ -107,10 +107,10 @@ def main(*args , **kwargs)
   - 📂 Creator_methods ← متدهای سازنده و ابزارهای ایجاد
     - 📂 3D_objects
       - camera.glb ← مدل سه‌بعدی دوربین
-    - Camera_controller.py
+    - [Camera_controller.py](https://github.com/Sina8204/Entity-engine/blob/bb4e1bece4351bf223ce8639858d3131b3512cc1/Docs/Camera_controller.md) ← مدیریت دوربین صحنه
     - Camera_creator.py
     - deselect.py
-    - Entity_creator.py
+    - [Entity_creator.py](https://github.com/Sina8204/Entity-engine/blob/bb4e1bece4351bf223ce8639858d3131b3512cc1/Docs/Entity_creator.md) ← کلاس ایجاد کننده انتیتی ها
     - File_browser.py
     - init.py
     - Scene_manager.py
@@ -153,4 +153,5 @@ def main(*args , **kwargs)
       - 📂 2D entity
         - sprite.py
   - app.py ← نقطه‌ی ورود اصلی برنامه
+
 
